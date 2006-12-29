@@ -1,0 +1,19 @@
+This is a simple 16-bit interface designed to take in a series of 16-bit words and verify that the CRC at the end of the data set is valid. 
+
+The idea is that you can feed this module a standard soma-style 16-bit-wide ethernet frame and it will tell you whether or not the FCS at the end of the frame is valid. 
+
+Inputs: 
+
+DIN[15:0] : data input
+DINEN : data input enable
+CLK: The clock 
+RESET: Reset system state
+
+Outputs: 
+CRCVALID: asserted synchronous with done if the byte stream / frame was valid
+DONE: asserted when we have read all of our bytes 
+
+We need to accomodate both byte and word-wide sets of data, which is a
+problem. Thus we have two sets of CRC combinational logic, an 8-bit
+wide one and a 16-bit wide one.
+

@@ -1,0 +1,5 @@
+Our test of the TX CRC generation module. 
+
+din.dat: per-tick code indicating the status of DIN and DINEN
+dout.dat : individual frames, one per line, as a series of 16-bit words
+

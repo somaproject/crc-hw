@@ -1,0 +1,35 @@
+This is python code, documentation, and test cases to demonstrate and
+document proper calculation of the ethernet frame check sequence (FCS)
+which we repeatedly use thoughout soma as a data checksum. 
+
+modules contained include: 
+
+crc_combinational: an 8-bit wide data input combinational CRC-32 calculator
+
+crc16_combinational: a 16-bit wide data input combinational CRC-32 calculator
+
+crcverify: takes in a 16-bit-wide ethernet frame with len-header and reports
+if the ending CRC is valid
+
+crcappend: takes in a 16-bit-wide ethernet frame with len-header and
+appends a 32-bit CRC as an ethernet FCS (i.e. inverted, bit-reversed, etc.)
+
+We use the python module crcmod (included) to write wrappers for
+computing the ethernet FCS from both data octet strings and numpy
+strings (both 8- and 16-bit wide)
+
+The CRC code is, I believe, structured such that passing a valid FCS
+through our module should generate a constant.
+
+from network docs: 
+
+Simultaneoulsy, a CRC-32 is calculated on the input byte stream. The
+exact methods for 802.3 FCS CRC generation are a bit complex,
+requiring the bytes to be complemented and sent in a certain
+direction, and bit-reversed as well. The FCS is appended onto the end
+of the frame. The CRC is loaded with 0xFFFFFFFF, which is tantamount
+to inverting the first four bytes (as specified by the standard).
+
+It looks as if the output of the crc_combinational and
+crc16_combinational are bit-reversed from the nominal output of
+crcmod, and thus from ethernet. 
