@@ -40,6 +40,8 @@ architecture Behavioral of crcappend is
   signal crcen : std_logic := '0';
   signal crc16outnrev : std_logic_vector(31 downto 0);
   signal crc8outnrev : std_logic_vector(31 downto 0);
+  signal crc16in : std_logic_vector(15 downto 0) := (others => '0');
+
   
   -- state machine
   type states is (none, lenout, dataout, crc16oh, crc16ol,
@@ -70,20 +72,28 @@ begin  -- Behavioral
       D  => dinl1(15 downto 8),
       CI => crc16l,
       CO => crc8);
-  
+
+  crc16in <= dinl1(7 downto 0) & dinl1(15 downto 8); 
+           
   crc16inst: crc16_combinational
     port map (
-      D  => dinl1, 
+      D  => crc16in, 
       CI => crc16l,
       CO => crc16);
   
   ldout <= lenl when osell = 0 else
            dinl2 when osell = 1 else
-           not crc16outnrev(31 downto 16) when osell = 2 else
-           not crc16outnrev(15 downto 0) when osell = 3 else
-           dinl2(15 downto 8) & not crc8outnrev(31 downto 24) when osell = 4 else
-           not crc8outnrev(23 downto 8) when osell = 5 else
-           not crc8outnrev(7 downto 0) & X"00" when osell = 6;
+           crc16outnrev(7 downto 0 )
+           & crc16outnrev(15 downto 8)
+                      when osell = 2 else
+           crc16outnrev(23 downto 16 )
+           & crc16outnrev(31 downto 24)
+                      when osell = 3 else
+           dinl2(15 downto 8) & 
+           crc8outnrev(7 downto 0) when osell = 4 else
+           crc8outnrev(15 downto 8) & crc8outnrev(23 downto 16)
+                         when osell = 5 else
+           crc8outnrev(31 downto 24) & X"00" when osell = 6;
 
   crcrev: for i in 0 to 31 generate
     crc16outnrev(i) <= not crc16out(31 -i);
@@ -107,9 +117,14 @@ begin  -- Behavioral
         denl <= den;
 
         -- crc registers
-        crc8out <= crc8;
-        crc16out <= crc16;
 
+        if crcen = '1' then
+          
+          crc8out <= crc8;
+          crc16out <= crc16;
+        end if;
+
+        
         if cs = none then
           crc16l <= (others => '1');
         else
@@ -185,7 +200,7 @@ begin  -- Behavioral
         when crc8oh =>
           osel <= 4;
           den <= '1';
-          crcen <= '0';
+          crcen <= '1';
           ns <= crc8om; 
         
         when crc8om =>

@@ -16,7 +16,7 @@ end crcverify;
 architecture Behavioral of crcverify is
 
   signal dinl   : std_logic_vector(15 downto 0) := (others => '0');
-  signal dinenl, dinenll, dinenlll : std_logic                     := '0';
+  signal dinenl, dinenll: std_logic                     := '0';
   signal resetl : std_logic                     := '0';
 
   signal crc8, crc8out  : std_logic_vector(31 downto 0) := (others => '0');
@@ -71,8 +71,7 @@ begin  -- Behavioral
       dinl   <= DIN;
       dinenl <= DINEN;
       dinenll <= dinenl;
-      dinenlll <= dinenll; 
-      resetl <= RESET;
+     resetl <= RESET;
 
       -- crc register
       if bcnt = X"0000" and dinenl = '1'  then
@@ -131,7 +130,7 @@ begin  -- Behavioral
       CRCVALID <= lcrcvalid; 
       
     end if;
-  end process main;
+  end process main; 
 
 
 end Behavioral;

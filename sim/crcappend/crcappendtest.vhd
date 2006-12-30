@@ -54,11 +54,36 @@ begin  -- Behavioral
       read(L, enable);
       hread(L, word);
       DINEN <= enable;
-      DIN <= word;
+      DIN <= word; 
     end loop;
     wait; 
 
   end process input_data;
+  
+  -- output data verify
+  output_data    : process
+    file dout_file : text open read_mode is "dout.dat";
+    variable L     : line;
+    variable len : integer := 0;
+    
+    variable word  : std_logic_vector(15 downto 0);
+  begin
+    while not endfile(dout_file) loop
+      readline(dout_file, L);
+      read(L, len);      
+      wait until rising_edge(CLK) and DOUTEN= '1';
+      for i in 0 to (len+1)/2 loop
+        hread(L, word);
+        assert DOUT = word report "Error reading data word" severity Error;
+        assert DOUTEN = '1' report "DOUTEN not high" severity Error;
+        wait until rising_edge(CLK);
+      end loop;  -- i
+      
+    end loop;
+    report "End of Simulation" severity Failure;
+    wait; 
+    
+  end process output_data;
   
 
 end Behavioral;
