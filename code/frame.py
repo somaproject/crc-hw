@@ -9,6 +9,67 @@ import crcmod
 
 CRCPOLY = 0x104C11DB7
 
+
+PROTO_IP = 0x0800
+PROTO_ARP = 0x0806
+
+
+class frame:
+    """
+    Ethernet frame simulation code in python; this is designed for both
+    extracting data from an ethernet frame and for generating ethernet
+    frames out of chunks of data
+    
+    note MAC addresses are strings of the form "AA:BB:CC:DD:EE:FF"
+    
+    
+    """
+
+    def __init__(self, destmac, srcmac, ethertype, data):
+        # for encoding
+        if isinstance(destmac, str):
+            self.destmac = macdecode(destmac)
+        else:
+            self.destmac = struct.pack("BBBBBB", destmac[0], destmac[1],
+                                       destmac[2], destmac[3], destmac[4],
+                                       destmac[5])
+
+        if isinstance(srcmac, str):
+            self.srcmac = macdecode(srcmac)
+        else:
+            self.srcmac = struct.pack("BBBBBB", srcmac[0], srcmac[1],
+                                      srcmac[2], srcmac[3], srcmac[4],
+                                      srcmac[5])
+        
+            
+        self.ethertype = ethertype
+        self.data = data
+
+
+    def getWire(self, preamble=7, SFD=True):
+        # returns a string containing the wire-representation of the
+        # frame
+
+        length = 6 + 6 + 2 + len(self.data) + 4
+
+        
+        frame = self.destmac + self.srcmac + \
+                struct.pack("BB", self.ethertype / 256, self.ethertype % 256)+\
+                self.data
+
+
+        outdata = frame + generateFCS(frame)
+
+        if SFD:
+            outdata = '\xd5' + outdata
+
+        for i in range(preamble):
+            outdata = '\x55' + outdata; 
+
+
+        return outdata
+        
+
 def intflip(x, width=32):
     """ return X with its MSB as its LSB and vice versa """
 
