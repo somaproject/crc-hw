@@ -13,6 +13,15 @@ CRCPOLY = 0x104C11DB7
 PROTO_IP = 0x0800
 PROTO_ARP = 0x0806
 
+def macdecode(macstring):
+    macre = re.compile("(\w\w):(\w\w):(\w\w):(\w\w):(\w\w):(\w\w)")
+    bytes = macre.match(macstring).groups()
+    result = [0, 0, 0, 0, 0, 0]
+    for i in range(6):
+        result[i] = int(bytes[i], 16)
+
+    return struct.pack("BBBBBB", result[0], result[1], result[2], result[3], result[4], result[5])
+
 
 class frame:
     """
