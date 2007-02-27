@@ -45,7 +45,7 @@ architecture Behavioral of crcappend is
   
   -- state machine
   type states is (none, lenout, dataout, crc16oh, crc16ol,
-                  crc8oh, crc8om, crc8ol);
+                  crc8oh, crc8om, crc8ol, donewait);
 
   signal cs, ns : states := none;
 
@@ -93,7 +93,8 @@ begin  -- Behavioral
            crc8outnrev(7 downto 0) when osell = 4 else
            crc8outnrev(15 downto 8) & crc8outnrev(23 downto 16)
                          when osell = 5 else
-           crc8outnrev(31 downto 24) & X"00" when osell = 6;
+           crc8outnrev(31 downto 24) & X"00" when osell = 6
+           else X"0000";
 
   crcrev: for i in 0 to 31 generate
     crc16outnrev(i) <= not crc16out(31 -i);
@@ -195,7 +196,7 @@ begin  -- Behavioral
           osel <= 3;
           den <= '1';
           crcen <= '0';
-          ns <= none; 
+          ns <= donewait; 
         
         when crc8oh =>
           osel <= 4;
@@ -213,8 +214,19 @@ begin  -- Behavioral
           osel <= 6;
           den <= '1';
           crcen <= '0';
-          ns <= none; 
+          ns <= donewait;
+          
+        when donewait =>
+          osel <= 0;
+          den <= '0';
+          crcen <= '0';
+          if dinenl = '1' then
+            ns <= donewait;
+          else
+            ns <= none; 
+          end if;
 
+          
         when others =>
           osel <= 0;
           den <= '0';

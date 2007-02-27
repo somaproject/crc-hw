@@ -17,7 +17,7 @@ dinfid = file('din.dat', 'w')
 doutfid = file('dout.dat', 'w')
 
 
-def genframe(data, prespace = 5):
+def genframe(data, prespace = 5, extracrap = 0):
     """ write the string data to the files as a frame,
     appending the proper length data and computing the crc
     """
@@ -33,6 +33,9 @@ def genframe(data, prespace = 5):
     for i in range((l+1)/2):
         dinfid.write("1 %2.2X%2.2X\n" % (ord(din[i*2]),
                                          ord(din[i*2+1])))
+    for i in range(extracrap):
+        dinfid.write("1 0000\n")
+        
     dinfid.write("0 0000\n")
 
     # write as output
@@ -60,6 +63,15 @@ def main():
     
     d = "\x00\x01\x02\x03\x04\x05\x06"
     genframe(d)
+
+    d = "\x00\x00\x00\x01"
+    genframe(d, extracrap = 7)
+    
+    d = "\x00\x01\x02\x03\x04\x05"
+    genframe(d, extracrap = 4)
+    
+    d = "\x00\x01\x02\x03\x04\x05\x06"
+    genframe(d, extracrap=1)
 
     # random data generation
     for i in range(10, 200):
